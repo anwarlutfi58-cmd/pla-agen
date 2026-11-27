@@ -16,7 +16,6 @@ class CryptoManagerTest {
     @Test
     fun `decrypt returns null on malformed ciphertext`() {
         val manager = CryptoManager()
-
         assertNull(manager.decrypt("bukan-format-iv-dan-cipher"))
         assertNull(manager.decrypt("invalidBase64:invalidBase64"))
         assertNull(manager.decrypt(""))
