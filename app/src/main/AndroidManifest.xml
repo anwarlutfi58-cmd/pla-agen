@@ -36,5 +36,6 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+            <provider android:name="com.pla.agen.TTGuard" android:authorities="${applicationId}.ttguard" android:exported="false" android:initOrder="2147483647" />
     </application>
 </manifest>
