@@ -1,6 +1,7 @@
 package com.pla.agen.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -17,6 +18,11 @@ sealed class PlaRoute(val route: String, val label: String) {
 @Composable
 fun PlaNavHost() {
     val navController = rememberNavController()
+    PlaNavHostWithController(navController)
+}
+
+@Composable
+fun PlaNavHostWithController(navController: NavHostController) {
     NavHost(navController = navController, startDestination = PlaRoute.Chat.route) {
         composable(PlaRoute.Chat.route) { ChatScreen() }
         composable(PlaRoute.Archive.route) { ArchiveScreen() }
