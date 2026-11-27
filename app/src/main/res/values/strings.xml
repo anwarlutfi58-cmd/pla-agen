@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">PLA Agen</string>
+    <string name="nav_chat">Ruang Percakapan</string>
+    <string name="nav_archive">Arsip Memori</string>
+    <string name="nav_settings">Pengaturan</string>
+    <string name="cd_upload">Unggah gambar, dokumen, atau file</string>
+    <string name="cd_mic">Diktekan perintah lewat suara</string>
+    <string name="cd_send">Kirim perintah ke Gemini</string>
+    <string name="cd_download_file">Unduh file ke folder Download</string>
+    <string name="cd_download_zip">Unduh keseluruhan proyek sebagai ZIP</string>
+</resources>
