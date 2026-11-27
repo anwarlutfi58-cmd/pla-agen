@@ -35,27 +35,65 @@ jobs:
       - name: Run unit tests
         run: gradle testDebugUnitTest --stacktrace
 
-      - name: Build release APK (signed jika ada keystore)
+      - name: Build release APK
+        run: gradle assembleRelease --stacktrace
+
+      - name: Sign APK (auto keystore)
         env:
           RELEASE_KEYSTORE_BASE64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.RELEASE_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: |
-          if [ -n "$RELEASE_KEYSTORE_BASE64" ]; then
-            mkdir -p app/keystore
-            echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > app/keystore/release.jks
-            export KEYSTORE_FILE=keystore/release.jks
-            echo "Mode: signed release"
-          else
-            echo "Mode: unsigned release (tidak ada keystore)"
+          set -e
+          UNSIGNED=$(find app/build/outputs/apk/release -name "*unsigned*.apk" | head -n 1)
+          if [ -z "$UNSIGNED" ]; then
+            echo "APK sudah signed dari Gradle, lewati langkah ini."
+            exit 0
           fi
-          gradle assembleRelease --stacktrace
+
+          mkdir -p signing
+          if [ -n "$RELEASE_KEYSTORE_BASE64" ]; then
+            echo "$RELEASE_KEYSTORE_BASE64" | base64 -d > signing/release.jks
+            KS=signing/release.jks
+            KSPASS="$KEYSTORE_PASSWORD"
+            ALIAS="$KEY_ALIAS"
+            KPASS="$KEY_PASSWORD"
+          else
+            echo "Membuat keystore otomatis (mode pakai sendiri)..."
+            KS=signing/auto.jks
+            KSPASS="plaagen123"
+            ALIAS="plaagen"
+            KPASS="plaagen123"
+            keytool -genkeypair -v \
+              -keystore "$KS" \
+              -storepass "$KSPASS" \
+              -keypass "$KPASS" \
+              -alias "$ALIAS" \
+              -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname "CN=PLA Agen, OU=PLA, O=PLA, L=ID, C=ID"
+          fi
+
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
+          echo "Pakai build-tools: $BT"
+
+          "$BT/zipalign" -f -p 4 "$UNSIGNED" signing/aligned.apk
+          "$BT/apksigner" sign \
+            --ks "$KS" \
+            --ks-pass pass:"$KSPASS" \
+            --key-pass pass:"$KPASS" \
+            --ks-key-alias "$ALIAS" \
+            --out app/build/outputs/apk/release/pla-agen-signed.apk \
+            signing/aligned.apk
+
+          "$BT/apksigner" verify --print-certs app/build/outputs/apk/release/pla-agen-signed.apk
+          rm "$UNSIGNED"
+          echo "APK berhasil ditandatangani: pla-agen-signed.apk"
 
       - name: Upload release APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pla-agen-release-apk
+          name: pla-agen-apk
           path: app/build/outputs/apk/release/*.apk
           if-no-files-found: error
 
