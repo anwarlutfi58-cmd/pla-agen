@@ -6,6 +6,7 @@ import com.pla.agen.data.local.AppDatabase
 import com.pla.agen.data.local.dao.ApiKeyDao
 import com.pla.agen.data.local.dao.ConversationDao
 import com.pla.agen.data.local.dao.MessageDao
+import com.pla.agen.data.local.dao.PreferenceDao
 import com.pla.agen.data.local.dao.SkillDao
 import dagger.Module
 import dagger.Provides
@@ -36,4 +37,7 @@ object DatabaseModule {
 
     @Provides
     fun provideSkillDao(db: AppDatabase): SkillDao = db.skillDao()
+
+    @Provides
+    fun providePreferenceDao(db: AppDatabase): PreferenceDao = db.preferenceDao()
 }
